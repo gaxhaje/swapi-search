@@ -1,31 +1,101 @@
 // componets/Timeline.js
 
 import { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import Card from '@material-ui/core/Card';
+import clsx from 'clsx';
 import CardHeader from '@material-ui/core/CardHeader';
+import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Collapse from '@material-ui/core/Collapse';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 import io from 'socket.io-client';
 
-// build with help from (https://www.florin-pop.com/blog/2019/04/how-to-create-a-timeline-with-react/)
-
-const CommentsWrapper = (props) => (
-  <div>{props.children}</div>
-);
-
-const avatarStyle = {
-  backgroundColor: '#e17b77',
-};
+const useStyles = makeStyles(theme => ({
+  card: {
+    flexGrow: 1,
+    margin: 'auto auto',
+    maxWidth: 345,
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: 200,
+  },
+  postButton: {
+    margin: theme.spacing(1),
+  },
+  commentName: {
+    display: 'block',
+    fontWeight: 'bold',
+    padding: '8px 8px 8px 0',
+  },
+  commentTitle: {
+    fontWeight: 'normal',
+    fontStyle: 'italic',
+    padding: '0 8px',
+  },
+  commentTime: {
+    fontWeight: 400,
+    fontSize: 12,
+    padding: '0 8px',
+    color: 'rgba(0, 0, 0, 0.5)',
+  },
+  commentText: {
+    display: 'block',
+    marginLeft: '10px',
+  },
+  typography: {
+    marginBottom: '15px',
+  }
+}));
 
 const socket = io.connect('http://localhost:8000')
 
-const comments = [];
-
 export default function Comments() {
+  const classes = useStyles();
   const [comments, setComments] = useState([]);
+  const [commentCnt, setCommentCnt] = useState(0);
+  const [expanded, setExpanded] = React.useState(false);
+  const [showFirst, setShowFirst] = useState({});
+  const [inputText, setInputText] = useState('');
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+
+  const handleInputChange = (event) => {
+    setInputText(event.target.value);
+  }
+
+  const handlePostComment = () => {
+    socket.emit('comment', {
+      id: Math.random(10000) * 100, 
+      name: 'Civic Champs',
+      title: 'Let\'s talk',
+      text: inputText,
+      time: '4 PM',
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -37,6 +107,8 @@ export default function Comments() {
     });
 
     socket.on('comments', data => {
+      setShowFirst(data[0]);
+      setCommentCnt(data.length);
       setComments(data);
     });
 
@@ -46,150 +118,67 @@ export default function Comments() {
   }, [comments]);
 
   return (
-    <CommentsWrapper>
-      <div className="timeline-container">
-        {comments.map(comment => (
-          <div className="timeline-item" key={comment.id}>
-            <div className="timeline-item-content">
-              <CardHeader
-                title={comment.title}
-                subheader={`Episode ${comment.name}`}
-              />
-              <CardContent>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  {comment.text}
-                </Typography>
-              </CardContent>
-              <time>{comment.date}</time>
-              <span className="circle" />
-            </div>
-          </div>
-        ))}
-      </div>
-      <style jsx>{`
-        .timeline-container {
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          margin: 40px 0;
-        }
-
-        .timeline-container::after {
-          background-color: #e17b77;
-          content: '';
-          position: absolute;
-          left: calc(50% - 2px);
-          width: 4px;
-          height: 100%;
-        }
-
-        .timeline-item {
-          display: flex;
-          justify-content: flex-end;
-          padding-right: 30px;
-          position: relative;
-          margin: 10px 0;
-          width: 50%;
-        }
-
-        .timeline-item:nth-child(odd) {
-          align-self: flex-end;
-          justify-content: flex-start;
-          padding-left: 30px;
-          padding-right: 0;
-        }
-
-        .timeline-item-content {
-          box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-          border-radius: 5px;
-          background-color: #fff;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          position: relative;
-          width: 400px;
-          max-width: 70%;
-          text-align: right;
-        }
-
-        .timeline-item-content::after {
-          content: ' ';
-          background-color: #fff;
-          box-shadow: 1px -1px 1px rgba(0, 0, 0, 0.2);
-          position: absolute;
-          right: -7.5px;
-          top: calc(50% - 7.5px);
-          transform: rotate(45deg);
-          width: 15px;
-          height: 15px;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-item-content {
-          text-align: left;
-          align-items: flex-start;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-item-content::after {
-          right: auto;
-          left: -7.5px;
-          box-shadow: -1px 1px 1px rgba(0, 0, 0, 0.2);
-        }
-
-        .timeline-item-content time {
-          color: #777;
-          font-size: 12px;
-          font-weight: bold;
-          right: -40px;
-          // border: 3px solid #e17b77;
-          // border-radius: 50%;
-          position: absolute;
-          top: calc(50% - 10px);
-          right: -125px;
-          margin-top: 2px;
-          z-index: 100;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-item-content time {
-          right: auto;
-          left: -125px;
-        }
-
-        .timeline-item-content .circle {
-          background-color: #fff;
-          border: 3px solid #e17b77;
-          border-radius: 50%;
-          position: absolute;
-          top: calc(50% - 10px);
-          right: -40px;
-          width: 20px;
-          height: 20px;
-          z-index: 100;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-item-content .circle {
-          right: auto;
-          left: -40px;
-        }
-
-        @media only screen and (max-width: 1023px) {
-          .timeline-item-content {
-            max-width: 100%;
+    <Card className={classes.card}>
+      <CardHeader
+        action={
+          <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: expanded,
+            })}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more comments"
+          >
+            <ExpandMoreIcon />
+          </IconButton>
           }
-        }
-
-        @media only screen and (max-width: 767px) {
-          .timeline-item-content,
-          .timeline-item:nth-child(odd) .timeline-item-content {
-            padding: 15px 10px;
-            text-align: center;
-            align-items: center;
-          }
-
-          .timeline-item-content time {
-            margin-top: 20px;
-          }
-        }
-      `}</style>
-    </CommentsWrapper>
+          subheader={`${comments.length} Comments`}
+      />
+      <CardContent>
+        <Typography variant="body2" color="textSecondary" component="p" className={classes.typography}>
+          <span className={classes.commentName}>
+            {showFirst.name} -
+            <span className={classes.commentTitle}>{showFirst.title}</span>
+            <span className={classes.commentTime}>{showFirst.time}</span>
+          </span>
+          <span className={classes.commentText}>{showFirst.text}</span>
+        </Typography>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          {comments && comments.slice(1).map((comment, idx) => (
+            <Typography variant="body2" color="textSecondary" component="p" className={classes.typography} key={idx}>
+              <span className={classes.commentName}>
+              {comment.name} -
+              <span className={classes.commentTitle}>{comment.title}</span>
+              <span className={classes.commentTime}>{comment.time}</span>
+            </span>
+            <span className={classes.commentText}>{comment.text}</span>
+            </Typography>
+          ))}
+        </Collapse>
+      </CardContent>
+      <CardActions disableSpacing>
+        <TextField
+          id="standard-full-width"
+          style={{ margin: 8 }}
+          placeholder="Add a comment"
+          fullWidth
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          onChange={handleInputChange}
+        />
+        <Button 
+          variant="contained" 
+          size="small" 
+          color="primary" 
+          onClick={handlePostComment}
+          className={classes.postButton}
+        >
+          Post
+        </Button>
+      </CardActions>
+      
+    </Card>
   );
 }
