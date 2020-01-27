@@ -1,0 +1,38 @@
+{
+  "name": "swapi-search",
+  "version": "1.0.0",
+  "description": "ar Wars API Search",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaxhaje/swapi-search.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gaxhaje/swapi-search/issues"
+  },
+  "homepage": "https://github.com/gaxhaje/swapi-search#readme",
+  "dependencies": {
+    "@material-ui/core": "^4.8.3",
+    "@material-ui/icons": "^4.5.1",
+    "@material-ui/lab": "^4.0.0-alpha.40",
+    "isomorphic-unfetch": "^3.0.0",
+    "next": "^9.2.0",
+    "radium": "^0.26.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-markdown": "^4.3.1",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
+    "swr": "^0.1.16",
+    "throttle-debounce": "^2.1.0"
+  }
+}
