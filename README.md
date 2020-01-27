@@ -1,2 +1,3 @@
-# swapi-search
-Star Wars API Search
+# swaipi-search
+Star Wars API Searc
+
